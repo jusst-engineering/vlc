@@ -86,6 +86,7 @@ enum libvlc_event_e {
     libvlc_MediaPlayerAudioVolume,
     libvlc_MediaPlayerAudioDevice,
     libvlc_MediaPlayerChapterChanged,
+    libvlc_MediaPlayerTeletextActivePageChanged,
 
     libvlc_MediaListItemAdded=0x200,
     libvlc_MediaListWillAddItem,
@@ -283,6 +284,11 @@ typedef struct libvlc_event_t
         {
             libvlc_renderer_item_t *item;
         } renderer_discoverer_item_deleted;
+
+        struct
+        {
+            int page;
+        } media_player_teletext_active_page_changed;
     } u; /**< Type-dependent event description */
 } libvlc_event_t;
 

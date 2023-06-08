@@ -89,6 +89,8 @@ static int
 snapshot_was_taken( vlc_object_t *p_this, char const *psz_cmd,
                     vlc_value_t oldval, vlc_value_t newval, void *p_data );
 
+static void update_teletext(libvlc_media_player_t *mp);
+
 static void libvlc_media_player_destroy( libvlc_media_player_t *p_mi );
 
 /*
@@ -445,9 +447,47 @@ input_event_changed( vlc_object_t * p_this, char const * psz_cmd,
                 libvlc_event_send( &p_mi->event_manager, &event );
             }
         }
+    } else if ( newval.i_int == INPUT_EVENT_TELETEXT) {
+        update_teletext(p_mi);
     }
 
     return VLC_SUCCESS;
+}
+
+static int vbi_page_event(vlc_object_t *, const char *, vlc_value_t, vlc_value_t val, void *param)
+{
+    libvlc_media_player_t *mp = param;
+
+    msg_Info(mp, "vbi_page_event: %ld\n", val.i_int);
+    libvlc_event_t event;
+    event.type = libvlc_MediaPlayerTeletextActivePageChanged;
+    event.u.media_player_teletext_active_page_changed.page = val.i_int;
+    libvlc_event_send(&mp->event_manager, &event);
+    return VLC_SUCCESS;
+}
+
+static void update_teletext(libvlc_media_player_t *mp) {
+    input_thread_t *p_input = libvlc_get_input_thread(mp);
+    if (p_input == NULL)
+      return;
+
+    const bool available = var_CountChoices(p_input, "teletext-es") > 0;
+    const int teletext_es = var_GetInteger(p_input, "teletext-es");
+    const bool active = available && teletext_es >= 0;
+
+    if (active) {
+        // Remove old callback
+        if (mp->input_vbi)
+            var_DelCallback(mp->input_vbi, "vbi-active-page", vbi_page_event, mp);
+
+        if (input_GetEsObjects(p_input, teletext_es, &mp->input_vbi, NULL, NULL) != VLC_SUCCESS)
+            mp->input_vbi = NULL;
+
+        if (mp->input_vbi) {
+            msg_Info(mp, "Add vbi-page callback");
+            var_AddCallback(mp->input_vbi, "vbi-active-page", vbi_page_event, mp);
+        }
+    }
 }
 
 static int track_type_from_name(const char *psz_name)

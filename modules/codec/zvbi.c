@@ -216,6 +216,9 @@ static int Open( vlc_object_t *p_this )
         i_page = 0;
     }
 
+    var_Create(p_dec, "vbi-active-page", VLC_VAR_INTEGER);
+    var_SetInteger(p_dec, "vbi-active-page", 0);
+
     p_sys = p_dec->p_sys = calloc( 1, sizeof(decoder_sys_t) );
     if( p_sys == NULL )
         return VLC_ENOMEM;
@@ -416,6 +419,7 @@ static int Decode( decoder_t *p_dec, block_t *p_block )
     msg_Dbg( p_dec, "we now have page: %d ready for display",
              i_wanted_page );
 #endif
+    var_SetInteger(p_dec, "vbi-active-page", i_wanted_page);
 
     /* Ignore transparent rows at the beginning and end */
     int i_first_row = get_first_visible_row( p_page.text, p_page.rows, p_page.columns );

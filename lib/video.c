@@ -500,6 +500,36 @@ int libvlc_video_get_teletext( libvlc_media_player_t *p_mi )
     return var_GetInteger (p_mi, "vbi-page");
 }
 
+int libvlc_video_get_teletext_active(libvlc_media_player_t *p_mi)
+{    input_thread_t *p_input_thread;
+    vlc_object_t *p_zvbi = NULL;
+    int telx;
+    int page = 0;
+
+    p_input_thread = libvlc_get_input_thread(p_mi);
+    if (!p_input_thread) return -1;
+
+    if (var_CountChoices(p_input_thread, "teletext-es") <= 0)
+    {
+        vlc_object_release( p_input_thread );
+        return 0;
+    }
+
+    telx = var_GetInteger(p_input_thread, "teletext-es");
+    if (telx >= 0)
+    {
+        if (input_GetEsObjects( p_input_thread, telx, &p_zvbi, NULL, NULL) == VLC_SUCCESS)
+        {
+            page = var_GetInteger(p_zvbi, "vbi-active-page");
+            vlc_object_release(p_zvbi);
+        }
+    }
+
+    vlc_object_release( p_input_thread );
+
+    return page;
+}
+
 static void teletext_enable( input_thread_t *p_input_thread, bool b_enable )
 {
     if( b_enable )

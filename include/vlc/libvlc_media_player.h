@@ -1350,6 +1350,14 @@ void libvlc_video_set_crop_geometry( libvlc_media_player_t *p_mi, const char *ps
 LIBVLC_API int libvlc_video_get_teletext( libvlc_media_player_t *p_mi );
 
 /**
+ * Get currently showing teletext page or 0 if it's disabled.
+ *
+ * \param p_mi the media player
+ * \return the current teletext page requested.
+ */
+LIBVLC_API int libvlc_video_get_teletext_active(libvlc_media_player_t *p_mi);
+
+/**
  * Set new teletext page to retrieve.
  *
  * This function can also be used to send a teletext key.

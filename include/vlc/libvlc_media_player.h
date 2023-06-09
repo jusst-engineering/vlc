@@ -1358,6 +1358,14 @@ LIBVLC_API int libvlc_video_get_teletext( libvlc_media_player_t *p_mi );
 LIBVLC_API int libvlc_video_get_teletext_active(libvlc_media_player_t *p_mi);
 
 /**
+ * Set the background rendering mode of teletext pages.
+ *
+ * \param p_mi the media player
+ * \param opque When `true`, render an opaque background, else make it transparent.
+ */
+LIBVLC_API void libvlc_video_set_teletext_opaque(libvlc_media_player_t *p_mi, bool opaque);
+
+/**
  * Set new teletext page to retrieve.
  *
  * This function can also be used to send a teletext key.

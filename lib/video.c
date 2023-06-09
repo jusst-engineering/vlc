@@ -530,6 +530,35 @@ int libvlc_video_get_teletext_active(libvlc_media_player_t *p_mi)
     return page;
 }
 
+void libvlc_video_set_teletext_opaque(libvlc_media_player_t *p_mi, bool opaque)
+{
+    input_thread_t *p_input_thread;
+    vlc_object_t *p_zvbi = NULL;
+    int telx;
+    int page = 0;
+
+    p_input_thread = libvlc_get_input_thread(p_mi);
+    if (!p_input_thread) return;
+
+    if (var_CountChoices(p_input_thread, "teletext-es") <= 0)
+    {
+        vlc_object_release(p_input_thread);
+        return;
+    }
+
+    telx = var_GetInteger(p_input_thread, "teletext-es");
+    if (telx >= 0)
+    {
+        if (input_GetEsObjects( p_input_thread, telx, &p_zvbi, NULL, NULL) == VLC_SUCCESS)
+        {
+            page = var_SetBool(p_zvbi, "vbi-opaque", opaque);
+            vlc_object_release(p_zvbi);
+        }
+    }
+
+    vlc_object_release(p_input_thread);
+}
+
 static void teletext_enable( input_thread_t *p_input_thread, bool b_enable )
 {
     if( b_enable )
